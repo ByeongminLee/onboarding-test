@@ -12,6 +12,10 @@
   --warn: #ff6b6b;
   --mission: #7b93ff;
   --learn: #ffd166;
+  --accent-dim: rgba(91,255,159,0.08);
+  --mission-dim: rgba(123,147,255,0.08);
+  --learn-dim: rgba(255,209,102,0.08);
+  --radius: 12px;
 }
 
 html, body, #root {
