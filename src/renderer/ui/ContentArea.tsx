@@ -1,9 +1,9 @@
-import { useOnboardingStore } from '@/store/onboarding-store';
-import { findDoc } from '@/content';
-import { DocContext } from '@/mdx/doc-context';
-import { MdxComponents } from '@/mdx/provider';
-import { ErrorBoundary } from './ErrorBoundary';
-import { CompleteButton } from './CompleteButton';
+import { useOnboardingStore } from "@/store/onboarding-store";
+import { findDoc } from "@/content";
+import { DocContext } from "@/mdx/doc-context";
+import { MdxComponents } from "@/mdx/provider";
+import { ErrorBoundary } from "./ErrorBoundary";
+import { CompleteButton } from "./CompleteButton";
 
 export function ContentArea() {
   const currentDocId = useOnboardingStore((s) => s.currentDocId);
@@ -14,7 +14,11 @@ export function ContentArea() {
 
   const doc = findDoc(currentDocId);
   if (!doc) {
-    return <div className="p-6 text-[var(--text-dim)]">문서를 찾을 수 없습니다: {currentDocId}</div>;
+    return (
+      <div className="p-6 text-[var(--text-dim)]">
+        문서를 찾을 수 없습니다: {currentDocId}
+      </div>
+    );
   }
 
   const Body = doc.Component;
@@ -24,11 +28,7 @@ export function ContentArea() {
       <DocContext.Provider value={doc.id}>
         <MdxComponents>
           <article className="mx-auto max-w-3xl p-8">
-            <header className="mb-6 border-b border-[var(--border)] pb-4">
-              <h1 className="mb-1 text-2xl font-bold">{doc.title}</h1>
-              <p className="text-[var(--text-dim)]">{doc.description}</p>
-            </header>
-            <div className="prose prose-invert max-w-none">
+            <div className="mdx-content max-w-none">
               <Body />
             </div>
             <div className="mt-8 border-t border-[var(--border)] pt-6">

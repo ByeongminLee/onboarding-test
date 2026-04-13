@@ -1,0 +1,135 @@
+---
+title: 계정/인증 시스템
+description: JWT 토큰 구조, Device ID, 회원가입/로그인 플로우를 설명합니다
+type: learn
+enforce: false
+---
+
+<Head title="계정/인증 시스템" date="2026-04-14" description="JWT 토큰 로테이션 + 단일 기기 로그인 + 이메일/소셜 인증" />
+
+## 토큰 구조
+
+| 항목 | 내용 |
+|---|---|
+| 발급 토큰 | Access Token (JWT) + Refresh Token (JWT) |
+| Access Token 유효기간 | 30분 |
+| Refresh Token 유효기간 | 14일 |
+| 저장 방식 | HTTP-only 쿠키 (`secure=True`, `samesite=Lax`) |
+| 토큰 갱신 | `POST /token/refresh/` → 새 Access + 새 Refresh (토큰 로테이션) |
+| 비밀번호 해싱 | Argon2 |
+
+### 보안 메커니즘
+
+- **토큰 로테이션:** Refresh 시 기존 토큰 블랙리스트 처리 + 새 토큰 발급
+- **동시성 보호:** Redis 락으로 refresh 토큰 race condition 방지
+- **재사용 방지:** 5분 내 동일 토큰 재사용 캐시 체크
+- **로그아웃:** refresh 토큰 블랙리스트 + Device ID 초기화
+
+---
+
+## Device ID (단일 기기 로그인)
+
+로그인 시 `X-Device-Id` 헤더 값을 `User.current_device_id`에 저장합니다. 다른 기기에서 로그인하면 기존 Device ID가 교체되어 이전 기기는 강제 로그아웃됩니다.
+
+---
+
+## 이메일 회원가입 플로우
+
+```mermaid
+sequenceDiagram
+    actor User as 유저
+    participant Browser as 프론트엔드(브라우저)
+    participant Server as 프론트엔드(서버)
+    participant BE as Django 백엔드
+
+    Note over Browser: Step 1 - 이메일 입력
+    User->>Browser: 이메일 입력 & 제출
+    Browser->>BE: POST /auth/email-verification/signup/
+    BE-->>User: 5자리 OTP 이메일 발송 (3분 유효)
+
+    Note over Browser: Step 2 - 이메일 OTP 인증
+    User->>Browser: OTP 입력
+    Browser->>BE: POST /auth/email-verification/confirm/
+    BE-->>Browser: 인증 완료
+
+    Note over Browser: Step 3 - 전화번호 입력
+    User->>Browser: 전화번호 입력
+    Browser->>BE: POST /auth/phone-verification/signup/
+    BE-->>User: SMS OTP 발송 (Naver Cloud SENS)
+
+    Note over Browser: Step 4 - SMS OTP 인증
+    User->>Browser: SMS OTP 입력
+    Browser->>BE: POST /auth/phone-verification/confirm/
+    BE-->>Browser: 인증 완료
+
+    Note over Browser: Step 5~6 - 비밀번호 + 약관동의
+    User->>Browser: 비밀번호 입력 & 약관동의 & 제출
+    Browser->>BE: POST /auth/signup/
+    BE->>BE: User 생성 + BASIC 구독 생성
+    BE-->>Browser: 성공 응답
+
+    Note over Browser: 자동 로그인
+    Browser->>Server: signIn("credentials", { email, password })
+    Server->>Server: generateDeviceId()
+    Server->>BE: POST /auth/login/ (X-Device-Id 헤더)
+    BE-->>Server: Set-Cookie (access, refresh)
+    Server-->>Browser: 세션 쿠키 설정
+    Browser->>Browser: redirect → /console/onboarding
+```
+
+---
+
+## 이메일 로그인 플로우
+
+```mermaid
+sequenceDiagram
+    actor User as 유저
+    participant Browser as 프론트엔드(브라우저)
+    participant Server as 프론트엔드(서버)
+    participant BE as Django 백엔드
+
+    User->>Browser: email + password 입력 & 제출
+    Browser->>Server: signIn("credentials", { email, password })
+    Server->>Server: generateDeviceId() 또는 기존 device_id 쿠키 사용
+    Server->>BE: POST /auth/login/ (email, password, X-Device-Id 헤더)
+    BE->>BE: 비밀번호 검증
+    BE->>BE: JWT 토큰 생성 + current_device_id 업데이트 + UserLoginLog 기록
+    BE-->>Server: Set-Cookie (access, refresh, device_id)
+    Server->>BE: GET /console/mypage/
+    BE-->>Server: 유저 정보 반환
+    Server->>Server: 세션 생성
+    Server-->>Browser: 세션 쿠키 설정
+    Browser->>Browser: redirect → /console
+```
+
+---
+
+## 소셜 로그인 플로우 (Kakao / Naver / Google)
+
+```mermaid
+sequenceDiagram
+    actor User as 유저
+    participant Browser as 프론트엔드(브라우저)
+    participant Server as 프론트엔드(서버)
+    participant BE as Django 백엔드
+    participant Social as 소셜 제공자
+
+    User->>Browser: 소셜 로그인 버튼 클릭
+    Browser->>BE: POST /auth/social/ ({ social, path: "LOGIN" })
+    BE-->>Browser: OAuth 인증 URL 반환
+    Browser->>Social: OAuth 페이지로 리다이렉트
+    User->>Social: 인가 승인
+    Social-->>BE: auth code 전달
+    BE->>Social: access_token 발급 요청
+    Social-->>BE: access_token 반환
+    BE->>Social: 유저 정보 조회
+    Social-->>BE: 유저 정보 반환
+    BE->>BE: SocialAccount 매칭 → JWT 토큰 생성
+    BE-->>Server: 리다이렉트 (Set-Cookie: access, refresh, device_id)
+    Server->>BE: GET /console/mypage/
+    BE-->>Server: 유저 정보 반환
+    Server->>Server: 세션 생성
+    Server-->>Browser: redirect → /console
+```
+
+> 신규 유저(소셜 회원가입)의 경우 추가 정보 입력(전화번호 인증, 약관동의) 단계가 포함됩니다.

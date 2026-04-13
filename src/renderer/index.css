@@ -12,13 +12,15 @@
   --warn: #ff6b6b;
   --mission: #7b93ff;
   --learn: #ffd166;
-  --accent-dim: rgba(91,255,159,0.08);
-  --mission-dim: rgba(123,147,255,0.08);
-  --learn-dim: rgba(255,209,102,0.08);
+  --accent-dim: rgba(91, 255, 159, 0.08);
+  --mission-dim: rgba(123, 147, 255, 0.08);
+  --learn-dim: rgba(255, 209, 102, 0.08);
   --radius: 12px;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   margin: 0;
 }
@@ -26,9 +28,311 @@ html, body, #root {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: "Noto Sans KR", system-ui, -apple-system, sans-serif;
+  font-family:
+    "Noto Sans KR",
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 .mono {
   font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.mdx-content {
+  line-height: 1.7;
+}
+
+.mdx-content h1,
+.mdx-content h2,
+.mdx-content h3,
+.mdx-content h4 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.mdx-content h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+.mdx-content h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  padding-top: 0.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.mdx-content h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.mdx-content p,
+.mdx-content ul,
+.mdx-content ol,
+.mdx-content table,
+.mdx-content blockquote,
+.mdx-content pre {
+  margin-top: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.mdx-content ul,
+.mdx-content ol {
+  padding-left: 1.25rem;
+}
+
+.mdx-content li + li {
+  margin-top: 0.35rem;
+}
+
+.mdx-content hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 1.2rem 0;
+}
+
+.mdx-content a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.mdx-content blockquote {
+  border-left: 4px solid var(--border);
+  margin-left: 0;
+  padding: 0.2rem 0.8rem;
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+}
+
+.mdx-content table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.mdx-content th,
+.mdx-content td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.mdx-content th {
+  background: var(--surface2);
+  font-weight: 700;
+}
+
+.mdx-content code {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.9em;
+}
+
+.mdx-content pre {
+  overflow: auto;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #101015;
+  padding: 0.85rem 0.95rem;
+}
+
+.mdx-content pre code {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: #e6e6f0;
+}
+
+.mdx-mermaid,
+.mdx-mermaid-loading,
+.mdx-mermaid-error {
+  margin: 0.9rem 0;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  overflow: auto;
+}
+
+.mdx-mermaid svg {
+  max-width: 100%;
+}
+
+.mdx-mermaid-loading {
+  color: var(--text-dim);
+}
+
+.mdx-mermaid-error p {
+  margin: 0 0 0.4rem;
+  color: var(--warn);
+}
+
+.mdx-flow {
+  margin: 1rem 0;
+  padding: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.mdx-flow-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mdx-flow-step {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+}
+
+.mdx-flow-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.mdx-flow-arrow {
+  line-height: 1;
+  font-size: 1.1rem;
+  color: var(--text-dim);
+  padding: 0.25rem 0;
+}
+
+.mdx-check {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0.75rem 0;
+}
+
+.mdx-check-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+
+.mdx-check-label {
+  display: inline;
+  margin: 0;
+}
+
+.mdx-check-label p {
+  display: inline;
+  margin: 0;
+}
+
+.mdx-matrix-wrap {
+  margin: 0.9rem 0 1.2rem;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.mdx-matrix-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+}
+
+.mdx-matrix-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.25rem;
+}
+
+.mdx-matrix-btn {
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.mdx-matrix-btn:hover {
+  filter: brightness(1.1);
+}
+
+.mdx-matrix-table th,
+.mdx-matrix-table td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+  white-space: normal;
+}
+
+.mdx-matrix-table thead th {
+  background: var(--surface2);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.mdx-matrix-table tbody th {
+  background: rgba(255, 255, 255, 0.02);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.mdx-matrix-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+.mdx-matrix-overlay-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  padding: 0.65rem 0.8rem;
+  margin-bottom: 0.7rem;
+}
+
+.mdx-matrix-overlay-body {
+  flex: 1;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  padding: 0.5rem;
 }

@@ -1,0 +1,43 @@
+---
+title: 앞으로 알아야 할 인프라
+description: 트래픽 증가 시 확장을 위해 알아두어야 할 NCP 서비스를 소개합니다
+type: learn
+enforce: false
+---
+
+<Head
+  title="앞으로 알아야 할 인프라"
+  date="2026-04-14"
+  description="현재 단순 구조에서 확장 시 필요한 NCP 서비스들"
+/>
+
+## 현재 구조의 한계
+
+현재는 stg/prod 각각 단일 서버로 운영 중입니다. 트래픽이 증가하거나 가용성 요구사항이 높아지면 아래 서비스 도입이 필요합니다.
+
+---
+
+## 알아야 할 NCP 서비스
+
+### Load Balancer (로드 밸런서)
+
+트래픽을 여러 서버에 분산합니다.
+
+- **Network Load Balancer:** L4, TCP/UDP 트래픽 분산
+- **Application Load Balancer:** L7, HTTP 경로 기반 라우팅
+
+도입 시 무중단 배포(Blue-Green, Rolling Update)가 가능해집니다.
+
+### Auto Scaling
+
+서버 부하에 따라 자동으로 서버 수를 늘리거나 줄입니다. Load Balancer와 함께 사용합니다.
+
+- 트래픽 급증 시 자동 확장 (Scale-Out)
+- 트래픽 감소 시 자동 축소 (비용 절감)
+
+### Cache DB (Redis / NCP Cloud DB for Redis)
+
+현재 Redis는 Docker 내부에서 Celery Broker + DEK 캐시 용도로만 사용 중입니다. 사용자 수가 늘면 별도 관리형 Redis 서비스로 전환이 필요합니다.
+
+- 세션 캐싱, API 응답 캐싱 등 활용 범위 확대
+- 관리형 서비스로 전환 시 HA(고가용성) 구성 가능

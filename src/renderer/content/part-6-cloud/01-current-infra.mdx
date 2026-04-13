@@ -1,0 +1,60 @@
+---
+title: 현재 인프라 (NCP)
+description: 현재 사용 중인 Naver Cloud Platform 서비스 목록을 설명합니다
+type: learn
+enforce: false
+---
+
+<Head
+  title="현재 인프라 (NCP)"
+  date="2026-04-14"
+  description="Naver Cloud Platform 기반 인프라 전체 구성"
+/>
+
+## 사용 중인 NCP 서비스
+
+| 서비스                           | 용도                    | 비고                            |
+| -------------------------------- | ----------------------- | ------------------------------- |
+| **Server**                       | stg + prod 서버 각 1대  | Ubuntu, Docker Compose로 운영   |
+| **Cloud DB for PostgreSQL**      | prod DB                 | local/stg는 Docker 내부 DB 사용 |
+| **Object Storage**               | 이미지 파일 저장        | AWS S3 호환                     |
+| **Cloud Outbound Mailer**        | 계정/결제 이메일 발송   | 회원가입 OTP, 결제 실패 등      |
+| **KMS (Key Management Service)** | 데이터 암호화 마스터 키 | DEK 암호화/복호화용             |
+| **ELSA**                         | 로그 수집·검색·분석     | 백엔드 애플리케이션 로그        |
+| **WMS (Web Service Monitoring)** | 헬스체크                | `/health/` 10분마다 체크        |
+| **Sub Account**                  | NCP IAM                 | 최소 권한 계정 키 관리          |
+
+---
+
+## Object Storage 버킷 목록
+
+| 버킷                    | 용도                             |
+| ----------------------- | -------------------------------- |
+| `foodlogic-bucket`      | prod 유저 데이터 (이미지 등)     |
+| `test-foodlogic-bucket` | stg 유저 데이터                  |
+| `foodlogic-logs`        | ELSA 로그 백업                   |
+| `foodlogic-assets`      | 랜딩 페이지 이미지 (프론트 사용) |
+
+---
+
+## DB 환경별 구성
+
+| 환경    | DB                          |
+| ------- | --------------------------- |
+| local   | Docker 내부 PostgreSQL 15   |
+| staging | Docker 내부 PostgreSQL 15   |
+| prod    | NCP Cloud DB for PostgreSQL |
+
+### 마이그레이션
+
+배포 시 자동으로 마이그레이션이 적용됩니다 (`make all`, `make staging`, `make prod`). 별도로 실행할 필요가 없습니다.
+
+---
+
+## NCP Sub Account (= AWS IAM)
+
+서비스별로 최소 권한만 부여한 계정 키를 사용합니다.
+
+예: Object Storage에만 접근 가능한 키를 별도 생성해서 백엔드 `.env`에 설정.
+
+Part 1에서 담당자에게 Sub Account 생성을 요청해야 하는 이유입니다.

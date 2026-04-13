@@ -1,0 +1,150 @@
+---
+title: 원가계산 비즈니스 로직
+description: 식자재→프렙→메뉴로 이어지는 원가 계산 시스템을 설명합니다
+type: learn
+enforce: false
+---
+
+<Head
+  title="원가계산 비즈니스 로직"
+  date="2026-04-14"
+  description="DAG 구조 + Django Signal 기반 재귀 원가 전파"
+/>
+
+## 아이템 계층 구조
+
+FoodLogic의 핵심 도메인입니다. 아이템은 4종류이며 계층을 이룹니다.
+
+| 아이템              | 레이어  | 설명                                     |
+| ------------------- | ------- | ---------------------------------------- |
+| 식자재 (Ingredient) | Layer 0 | 원재료                                   |
+| 부자재 (Supplies)   | Layer 0 | 포장재 등 비원가 자재                    |
+| 프렙 (Prep)         | Layer 1 | 반조리품. 식자재/부자재/프렙을 포함 가능 |
+| 메뉴 (Menu)         | Layer 2 | 최종 메뉴. 모든 아이템을 포함 가능       |
+
+### 포함 관계
+
+| 부모 \ 자식 | 식자재 | 부자재 | 프렙     | 메뉴     |
+| ----------- | ------ | ------ | -------- | -------- |
+| **프렙**    | O      | O      | O (재귀) | X        |
+| **메뉴**    | O      | O      | O        | O (재귀) |
+
+```
+┌──────────────────────────────────────┐
+│  메뉴 (Menu) — 같은 종류 포함 가능    │
+│                                      │
+│  ┌────────────────────────────────┐  │
+│  │  프렙 (Prep) — 같은 종류 포함 가능│ │
+│  │                                │  │
+│  │  ┌──────────┐  ┌──────────┐   │  │
+│  │  │  식자재   │  │  부자재   │   │  │
+│  │  └──────────┘  └──────────┘   │  │
+│  └────────────────────────────────┘  │
+└──────────────────────────────────────┘
+```
+
+이 구조는 **DAG(Directed Acyclic Graph)** 형태입니다. 하나의 식자재가 여러 프렙/메뉴에 포함될 수 있습니다.
+
+---
+
+## g_cost 계산식
+
+```
+g_cost = 구매가 / (순중량g × 수율)
+```
+
+`g_cost`는 1g당 비용입니다. 식자재의 구매가와 순중량, 수율을 기반으로 계산됩니다.
+
+---
+
+## 아이템 등록/수정 플로우
+
+```mermaid
+sequenceDiagram
+    actor User as 유저
+    participant FE as 프론트엔드
+    participant BE as Django 백엔드
+    participant DB as Database
+    participant Signal as Django Signal
+
+    Note over User,Signal: 식자재 구매가 등록/수정
+    User->>FE: 식자재 구매가 입력
+    FE->>BE: POST /ingredients/{id}/purchase-logs/
+    BE->>DB: PurchaseLog 생성
+    BE->>DB: g_cost 계산 저장 (구매가 / 순중량g × 수율)
+    DB-->>Signal: post_save(PurchaseLog) 발생
+    BE-->>FE: 등록 완료 응답
+    Note over Signal: → 재귀 계산 플로우로 이동
+
+    Note over User,Signal: 프렙 생성/수정
+    User->>FE: 프렙 구성품 설정
+    FE->>BE: POST or PATCH /preps/{id}/
+    BE->>DB: PrepIngredient/PrepPrep/PrepSupplies 저장
+    DB-->>Signal: post_save 발생
+    BE->>BE: prep.recalculate_cost_log()
+    BE->>DB: PrepCostLog update_or_create (Σ g_cost × 사용량g)
+    BE-->>FE: 수정 완료 응답
+    Note over Signal: → 재귀 계산 플로우로 이동
+
+    Note over User,Signal: 메뉴 생성/수정
+    User->>FE: 메뉴 구성품 설정
+    FE->>BE: POST or PATCH /menus/{id}/
+    BE->>DB: MenuIngredient/MenuPrep/MenuSubMenu/MenuSupplies 저장
+    DB-->>Signal: post_save 발생
+    BE->>BE: menu.recalculate_cost_log()
+    BE->>DB: MenuCostLog update_or_create (Σ g_cost × 사용량g + 부자재)
+    BE-->>FE: 수정 완료 응답
+    Note over Signal: → 재귀 계산 플로우로 이동
+```
+
+---
+
+## 재귀 원가 전파
+
+하위 아이템이 변경되면 이를 포함하는 **모든 상위 아이템의 원가가 자동으로 재계산**됩니다.
+
+### 전파 경로
+
+```
+식자재 변경 → 프렙 → 상위 프렙 → 메뉴 → 상위 메뉴
+부자재 변경 → 메뉴 → 상위 메뉴
+프렙 변경   → 상위 프렙 → 메뉴 → 상위 메뉴
+메뉴 변경   → 상위 메뉴
+```
+
+### 재귀 전파 구현
+
+```mermaid
+sequenceDiagram
+    participant Signal as Django Signal
+    participant Sync as CostLogSynchronizer
+    participant DB as Database
+
+    Signal->>Signal: SignalController 활성 여부 확인
+    Signal->>Signal: 중복 실행 방지 체크
+    Signal->>Sync: transaction.on_commit → update_related_cost_logs_from_ingredient(id)
+
+    Note over Sync,DB: Step 1: 영향받는 아이템 수집 (BFS)
+    Sync->>DB: PrepIngredient.filter(sub_ingredient_id=id) → 프렙 수집
+    Sync->>DB: PrepPrep.filter(sub_prep_id__in=prep_ids) → 상위 프렙 재귀 수집
+    Sync->>DB: MenuPrep, MenuIngredient → 메뉴 수집
+    Sync->>DB: MenuSubMenu → 상위 메뉴 재귀 수집
+
+    Note over Sync,DB: Step 2: 프렙 벌크 업데이트 (위상 정렬 순서)
+    Sync->>Sync: 위상 정렬 (하위 프렙 → 상위 프렙 순서)
+    Sync->>DB: PrepCostLog.bulk_create / bulk_update (batch_size=100)
+
+    Note over Sync,DB: Step 3: 메뉴 벌크 업데이트 (위상 정렬 순서)
+    Sync->>Sync: 위상 정렬 (하위 메뉴 → 상위 메뉴 순서)
+    Sync->>DB: MenuCostLog.bulk_create / bulk_update (batch_size=100)
+
+    Note over Signal,DB: 전체 과정 transaction.atomic()으로 보장
+```
+
+---
+
+## unLinked 아이템
+
+상위 아이템(A)에 포함된 하위 아이템(B)을 따로 삭제하면, A의 중량·원가를 유지하기 위해 `is_unlinked=True` 상태의 대체 아이템이 A에 남습니다. 이 아이템은 수정 불가, 삭제만 가능합니다.
+
+> **왜?** B가 산출량 % 대신 직접 중량(예: 500g)으로 입력된 경우, B 삭제 후 A의 나머지 구성품 합계(예: 300g)가 500g보다 적어지는 오류를 방지합니다.

@@ -1,7 +1,3 @@
-import { useContext } from 'react';
-import { DocContext } from './doc-context';
-import { useOnboardingStore } from '@/store/onboarding-store';
-
 interface MissionProps {
   title: string;
   description: string;
@@ -17,22 +13,5 @@ export function Mission({ title, description }: MissionProps) {
 }
 
 export function MissionNote() {
-  const docId = useContext(DocContext);
-  if (!docId) throw new Error('<MissionNote> must be used inside a DocContext.Provider');
-  const value = useOnboardingStore((s) => s.missions[docId] ?? '');
-  const setNote = useOnboardingStore((s) => s.setMissionNote);
-
-  return (
-    <label className="my-4 block">
-      <span className="mb-1 block text-sm text-[var(--text-dim)]">
-        체험 후 느낀 점, 궁금한 점을 자유롭게 적어주세요
-      </span>
-      <textarea
-        className="w-full rounded border border-[var(--border)] bg-[var(--surface)] p-3 text-sm text-[var(--text)]"
-        rows={6}
-        value={value}
-        onChange={(e) => setNote(docId, e.target.value)}
-      />
-    </label>
-  );
+  return null;
 }

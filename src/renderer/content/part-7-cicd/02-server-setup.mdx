@@ -1,0 +1,96 @@
+---
+title: 서버 초기 세팅
+description: 신규 NCP 서버 생성 시 초기 환경을 구성하는 절차를 설명합니다
+type: learn
+enforce: false
+---
+
+<Head
+  title="서버 초기 세팅"
+  date="2026-04-14"
+  description="신규 서버 생성 시 1회 실행하는 세팅 절차"
+/>
+
+> 기존 서버에 배포하는 방법은 [배포 방법](/part-7-cicd/01-deployment) 문서를 참고하세요. 이 문서는 **새 서버를 생성할 때만** 필요합니다.
+
+## 초기 세팅 절차
+
+### 1. NCP 서버 생성
+
+NCP 콘솔에서 서버를 생성합니다.
+
+### 2. SSH 접속
+
+pem 키로 접속합니다 (Google Drive에서 다운로드).
+
+### 3. git 토큰 세팅 + 클론
+
+```bash
+git clone git@github.com:team-foodlogic/backend.git
+cd backend
+```
+
+### 4. 환경별 브랜치 전환
+
+```bash
+git checkout stg   # staging 서버인 경우
+git checkout main  # prod 서버인 경우
+```
+
+### 5. .env 세팅
+
+Google Drive에서 환경에 맞는 `.env` 파일을 다운로드하여 레포 루트에 위치시킵니다.
+
+| 환경    | 파일           |
+| ------- | -------------- |
+| local   | `.env`         |
+| staging | `.env.staging` |
+| prod    | `.env.prod`    |
+
+### 6. 방화벽 설정
+
+```bash
+sudo ufw allow 22
+sudo ufw allow 80
+sudo ufw allow 443
+sudo ufw enable
+```
+
+### 7. Docker 설치
+
+```bash
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+docker --version
+```
+
+### 8. SSL 인증서 설정 (Certbot)
+
+```bash
+sudo apt install -y certbot
+sudo certbot certonly --standalone -d api.foodlogic.co.kr  # prod의 경우
+```
+
+### 9. 배포 실행
+
+```bash
+# staging
+make staging
+
+# prod
+sudo make prod
+```
+
+### 10. SSL 갱신 스크립트 권한 부여
+
+```bash
+# stg
+chmod 777 renew-ssl-staging.sh
+
+# prod
+chmod 777 renew-ssl-prod.sh
+```
+
+### 11. NCP 도메인 연결
+
+NCP 콘솔에서 서버 IP를 도메인에 연결합니다.

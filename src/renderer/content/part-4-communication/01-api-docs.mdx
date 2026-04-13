@@ -1,0 +1,64 @@
+---
+title: API 문서
+description: API 명세서 관리 방식과 응답 규격을 설명합니다
+type: learn
+enforce: false
+---
+
+<Head title="API 문서" date="2026-04-14" description="llms.txt 기반 AI-friendly API 명세 시스템" />
+
+## 현재 방식: llms.txt
+
+백엔드가 AI 친화적인 MD 문서를 자동 생성합니다. 로컬 백엔드 서버(`localhost:8000`)를 실행하면 접근 가능합니다.
+
+| 경로 | 내용 |
+|---|---|
+| `GET /llms.txt` | 목차 — 전체 API URL과 한 줄 설명 |
+| `GET /llms.txt?path=/api/xxx/` | 특정 API 상세 문서 (요청/응답 예제 포함) |
+
+### 프론트엔드에서 활용하는 방법
+
+1. 백엔드 로컬 서버 실행 (`make all`)
+2. AI 도구(Claude, Cursor 등)에 `http://localhost:8000/llms.txt` 경로를 전달
+3. AI가 해당 문서를 읽고 API 정보를 기반으로 개발 지원
+
+---
+
+## 구 방식: Notion (참고용)
+
+과거에는 Notion에 API 명세서를 수기로 작성했습니다. 현재는 사용하지 않습니다.
+
+---
+
+## API 응답 규격
+
+모든 API는 아래 형식을 따릅니다.
+
+### 기본 응답
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "string or null",
+  "data": {}
+}
+```
+
+- `code`: 결과 구분값. 성공 시 대체로 `"SUCCESS"` 고정
+- `message`: 필요 시 문자열 반환, 없으면 `null`
+- `data`: 실제 데이터
+
+### 페이지네이션 응답
+
+```json
+{
+  "code": "SUCCESS",
+  "message": null,
+  "data": {
+    "page": 1,
+    "total_page": 5,
+    "page_size": 20,
+    "items": []
+  }
+}
+```

@@ -1,18 +1,18 @@
-import { Button } from '@heroui/react';
-import { useOnboardingStore } from '@/store/onboarding-store';
-import { allDocs, findDoc } from '@/content';
-import type { DocType } from '@/content/types';
+import { Button } from "@heroui/react";
+import { useOnboardingStore } from "@/store/onboarding-store";
+import { allDocs, findDoc } from "@/content";
+import type { DocType } from "@/content/types";
 
 const TYPE_LABEL: Record<DocType, string> = {
-  checklist: 'CHECKLIST',
-  mission: 'MISSION',
-  learn: 'LEARN',
+  checklist: "CHECKLIST",
+  mission: "MISSION",
+  learn: "LEARN",
 };
 
 const TYPE_COLOR: Record<DocType, string> = {
-  checklist: 'var(--accent)',
-  mission: 'var(--mission)',
-  learn: 'var(--learn)',
+  checklist: "var(--accent)",
+  mission: "var(--mission)",
+  learn: "var(--learn)",
 };
 
 export function TopBar() {
@@ -42,13 +42,15 @@ export function TopBar() {
       <div className="flex gap-2">
         <Button
           variant="ghost"
+          className="border border-[var(--border)] bg-[var(--surface2)] text-[var(--text)]"
           isDisabled={!prev}
           onPress={() => prev && setCurrent(prev.id)}
         >
           ◀ 이전
         </Button>
         <Button
-          variant="primary"
+          variant="secondary"
+          className="border border-[var(--border)] bg-[var(--text)] text-[var(--bg)]"
           isDisabled={!next}
           onPress={() => next && setCurrent(next.id)}
         >
