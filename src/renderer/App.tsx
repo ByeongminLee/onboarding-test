@@ -1,14 +1,26 @@
-import { contentTree } from '@/content';
+import { useEffect } from 'react';
+import { contentTree, allDocs } from '@/content';
+import { useOnboardingStore } from '@/store/onboarding-store';
+import { Sidebar } from '@/ui/Sidebar';
+import { MainArea } from '@/ui/MainArea';
+import { StorageWarning } from '@/ui/StorageWarning';
 
 export default function App() {
+  const currentDocId = useOnboardingStore((s) => s.currentDocId);
+  const setCurrentDoc = useOnboardingStore((s) => s.setCurrentDoc);
+
+  useEffect(() => {
+    // Initialize or fall back to first doc if the saved currentDocId no longer exists
+    if (currentDocId && allDocs.find((d) => d.id === currentDocId)) return;
+    if (allDocs[0]) setCurrentDoc(allDocs[0].id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">파트 {contentTree.length}개 로드됨</h1>
-      <ul className="list-disc pl-5">
-        {contentTree.map(p => (
-          <li key={p.id}>{p.title} ({p.docs.length}개 문서)</li>
-        ))}
-      </ul>
+    <div className="flex h-screen">
+      <StorageWarning />
+      <Sidebar tree={contentTree} />
+      <MainArea />
     </div>
   );
 }
