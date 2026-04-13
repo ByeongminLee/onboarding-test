@@ -6,21 +6,28 @@
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
     "@tailwindcss/vite": "^4.2.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",
     "electron": "^33.0.0",
     "electron-builder": "^25.1.8",
     "electron-vite": "^3.1.0",
+    "jsdom": "^29.0.2",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.3",
-    "vite": "^6.0.0"
+    "vite": "^6.0.0",
+    "vitest": "^4.1.4"
   },
   "dependencies": {
     "@heroui/react": "^3.0.2",

@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.web.json",
+  "compilerOptions": {
+    "composite": false,
+    "types": ["vitest/globals", "@testing-library/jest-dom"],
+    "noEmit": true
+  },
+  "include": ["tests/**/*.ts", "tests/**/*.tsx", "src/renderer/**/*"]
+}
