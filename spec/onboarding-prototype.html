@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Onboarding</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0c;
+  --surface: #141418;
+  --surface2: #1c1c22;
+  --border: #2a2a33;
+  --text: #e8e8ec;
+  --text-dim: #7a7a88;
+  --accent: #5bff9f;
+  --accent-dim: rgba(91,255,159,0.08);
+  --accent-glow: rgba(91,255,159,0.15);
+  --warn: #ff6b6b;
+  --mission: #7b93ff;
+  --mission-dim: rgba(123,147,255,0.08);
+  --learn: #ffd166;
+  --learn-dim: rgba(255,209,102,0.08);
+  --radius: 12px;
+  --font: 'Noto Sans KR', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); min-height:100vh; display:flex; }
+::selection { background:var(--accent); color:var(--bg); }
+
+/* Sidebar */
+.sidebar {
+  width:300px; min-height:100vh; background:var(--surface);
+  border-right:1px solid var(--border); padding:32px 0;
+  position:fixed; left:0; top:0; bottom:0; overflow-y:auto;
+  display:flex; flex-direction:column;
+}
+.sidebar-header { padding:0 24px 28px; border-bottom:1px solid var(--border); }
+.sidebar-header h1 {
+  font-size:15px; font-weight:700; letter-spacing:-0.3px;
+  display:flex; align-items:center; gap:10px;
+}
+.sidebar-header h1 .dot { width:8px; height:8px; border-radius:50%; background:var(--accent); box-shadow:0 0 12px var(--accent); }
+.sidebar-header .subtitle { font-size:12px; color:var(--text-dim); margin-top:6px; }
+
+.progress-bar-wrap { padding:20px 24px; border-bottom:1px solid var(--border); }
+.progress-label { font-size:11px; color:var(--text-dim); margin-bottom:8px; display:flex; justify-content:space-between; font-family:var(--mono); }
+.progress-track { height:4px; background:var(--surface2); border-radius:2px; overflow:hidden; }
+.progress-fill { height:100%; background:var(--accent); border-radius:2px; transition:width 0.5s cubic-bezier(0.4,0,0.2,1); }
+
+.nav-section { padding:20px 0; flex:1; }
+.nav-chapter {
+  padding:8px 24px; font-size:11px; font-weight:700; color:var(--text-dim);
+  text-transform:uppercase; letter-spacing:1.5px; font-family:var(--mono);
+  margin-top:8px;
+}
+.nav-item {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 24px; cursor:pointer; transition:all 0.15s;
+  font-size:13px; color:var(--text-dim); position:relative;
+}
+.nav-item:hover { background:var(--accent-dim); color:var(--text); }
+.nav-item.active { color:var(--text); background:var(--accent-dim); }
+.nav-item.active::before {
+  content:''; position:absolute; left:0; top:4px; bottom:4px;
+  width:3px; background:var(--accent); border-radius:0 3px 3px 0;
+}
+.nav-item.completed .nav-icon { background:var(--accent); color:var(--bg); }
+.nav-icon {
+  width:22px; height:22px; border-radius:6px; display:flex;
+  align-items:center; justify-content:center; font-size:11px;
+  border:1.5px solid var(--border); flex-shrink:0;
+  font-family:var(--mono); font-weight:500; transition:all 0.2s;
+}
+.nav-item.completed .nav-icon { border-color:var(--accent); }
+
+/* Main */
+.main { margin-left:300px; flex:1; min-height:100vh; }
+.topbar {
+  position:sticky; top:0; z-index:10; background:rgba(10,10,12,0.85);
+  backdrop-filter:blur(20px); border-bottom:1px solid var(--border);
+  padding:16px 48px; display:flex; align-items:center; justify-content:space-between;
+}
+.topbar-left { display:flex; align-items:center; gap:12px; }
+.chapter-badge {
+  font-size:10px; font-family:var(--mono); font-weight:500;
+  padding:4px 10px; border-radius:20px; letter-spacing:0.5px;
+}
+.chapter-badge.checklist { background:var(--accent-dim); color:var(--accent); }
+.chapter-badge.mission { background:var(--mission-dim); color:var(--mission); }
+.chapter-badge.learn { background:var(--learn-dim); color:var(--learn); }
+.topbar-title { font-size:14px; font-weight:500; }
+.topbar-right { display:flex; gap:8px; }
+.topbar-btn {
+  padding:8px 16px; border-radius:8px; border:1px solid var(--border);
+  background:transparent; color:var(--text-dim); font-size:12px;
+  cursor:pointer; font-family:var(--font); transition:all 0.15s;
+}
+.topbar-btn:hover { border-color:var(--accent); color:var(--accent); }
+.topbar-btn.primary { background:var(--accent); color:var(--bg); border-color:var(--accent); font-weight:600; }
+.topbar-btn.primary:hover { opacity:0.9; }
+
+.content { max-width:720px; margin:0 auto; padding:48px 48px 120px; }
+
+/* Step Content */
+.step-header { margin-bottom:36px; }
+.step-number { font-size:12px; font-family:var(--mono); color:var(--text-dim); margin-bottom:8px; }
+.step-title { font-size:28px; font-weight:900; letter-spacing:-0.5px; line-height:1.3; }
+.step-desc { font-size:14px; color:var(--text-dim); margin-top:12px; line-height:1.7; }
+
+/* MD-rendered content area */
+.md-body { line-height:1.8; font-size:14.5px; }
+.md-body h2 { font-size:18px; font-weight:700; margin:32px 0 12px; }
+.md-body h3 { font-size:15px; font-weight:600; margin:24px 0 8px; color:var(--accent); }
+.md-body p { margin:12px 0; color:var(--text); opacity:0.88; }
+.md-body ul, .md-body ol { padding-left:20px; margin:12px 0; }
+.md-body li { margin:6px 0; color:var(--text); opacity:0.85; }
+.md-body code {
+  font-family:var(--mono); background:var(--surface2); padding:2px 8px;
+  border-radius:4px; font-size:13px;
+}
+.md-body blockquote {
+  border-left:3px solid var(--accent); padding:12px 20px;
+  background:var(--accent-dim); border-radius:0 8px 8px 0; margin:16px 0;
+  font-size:13.5px; color:var(--text);
+}
+.md-body img, .md-body .img-placeholder {
+  width:100%; border-radius:var(--radius); border:1px solid var(--border);
+  margin:16px 0; background:var(--surface2);
+}
+.img-placeholder {
+  height:200px; display:flex; align-items:center; justify-content:center;
+  color:var(--text-dim); font-size:13px;
+}
+
+/* Checklist item */
+.checklist-box {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:20px 24px; margin:16px 0; display:flex; align-items:flex-start; gap:14px;
+  cursor:pointer; transition:all 0.2s;
+}
+.checklist-box:hover { border-color:var(--accent); background:var(--accent-dim); }
+.checklist-box.checked { border-color:var(--accent); }
+.checklist-box.checked .cb-check { background:var(--accent); border-color:var(--accent); color:var(--bg); }
+.checklist-box.checked .cb-label { text-decoration:line-through; opacity:0.5; }
+.cb-check {
+  width:22px; height:22px; border-radius:6px; border:2px solid var(--border);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  font-size:12px; transition:all 0.2s; margin-top:1px;
+}
+.cb-content { flex:1; }
+.cb-label { font-size:14px; font-weight:500; }
+.cb-hint { font-size:12px; color:var(--text-dim); margin-top:4px; line-height:1.5; }
+
+/* Mission */
+.mission-card {
+  background:var(--mission-dim); border:1px solid rgba(123,147,255,0.2);
+  border-radius:var(--radius); padding:24px; margin:20px 0;
+}
+.mission-card h4 { color:var(--mission); font-size:13px; font-family:var(--mono); margin-bottom:10px; letter-spacing:0.5px; }
+.mission-card p { font-size:14px; line-height:1.7; }
+.mission-textarea {
+  width:100%; min-height:100px; background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:16px; color:var(--text); font-family:var(--font);
+  font-size:14px; resize:vertical; margin-top:16px; outline:none; transition:border 0.2s;
+}
+.mission-textarea:focus { border-color:var(--mission); }
+.mission-textarea::placeholder { color:var(--text-dim); }
+
+/* Quiz */
+.quiz-wrap { margin:24px 0; }
+.quiz-q { font-size:14px; font-weight:600; margin-bottom:12px; }
+.quiz-option {
+  display:flex; align-items:center; gap:10px; padding:12px 16px;
+  background:var(--surface); border:1px solid var(--border); border-radius:8px;
+  margin:6px 0; cursor:pointer; font-size:13.5px; transition:all 0.15s;
+}
+.quiz-option:hover { border-color:var(--learn); }
+.quiz-option.selected { border-color:var(--learn); background:var(--learn-dim); }
+.quiz-option.correct { border-color:var(--accent); background:var(--accent-dim); }
+.quiz-option.wrong { border-color:var(--warn); background:rgba(255,107,107,0.08); }
+.quiz-radio {
+  width:16px; height:16px; border-radius:50%; border:2px solid var(--border);
+  flex-shrink:0; transition:all 0.15s;
+}
+.quiz-option.selected .quiz-radio { border-color:var(--learn); background:var(--learn); }
+.quiz-option.correct .quiz-radio { border-color:var(--accent); background:var(--accent); }
+.quiz-option.wrong .quiz-radio { border-color:var(--warn); background:var(--warn); }
+.quiz-feedback {
+  margin-top:10px; font-size:13px; padding:10px 14px; border-radius:8px;
+  display:none;
+}
+.quiz-feedback.show { display:block; }
+.quiz-feedback.correct { background:var(--accent-dim); color:var(--accent); }
+.quiz-feedback.wrong { background:rgba(255,107,107,0.08); color:var(--warn); }
+
+/* Glossary */
+.glossary-item {
+  padding:16px 0; border-bottom:1px solid var(--border);
+}
+.glossary-term {
+  font-family:var(--mono); font-weight:600; font-size:14px; color:var(--learn);
+}
+.glossary-def { font-size:13.5px; color:var(--text-dim); margin-top:4px; line-height:1.6; }
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(16px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.content { animation: fadeUp 0.4s ease; }
+
+/* Toast */
+.toast {
+  position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(80px);
+  background:var(--accent); color:var(--bg); padding:12px 24px; border-radius:10px;
+  font-size:13px; font-weight:600; z-index:100; transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  box-shadow:0 8px 32px rgba(91,255,159,0.3);
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <h1><span class="dot"></span>Onboarding</h1>
+    <div class="subtitle">신규 입사자 가이드</div>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-label"><span>진행률</span><span id="progressPct">0%</span></div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+  <nav class="nav-section" id="navSection"></nav>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="chapter-badge checklist" id="chapterBadge">CHECKLIST</span>
+      <span class="topbar-title" id="topbarTitle">—</span>
+    </div>
+    <div class="topbar-right">
+      <button class="topbar-btn" id="prevBtn" onclick="navigate(-1)">← 이전</button>
+      <button class="topbar-btn primary" id="nextBtn" onclick="navigate(1)">다음 →</button>
+    </div>
+  </div>
+  <div class="content" id="content"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATA (simulating parsed MD with frontmatter) ───
+const steps = [
+  // CHAPTER 1: 세팅
+  {
+    chapter: '세팅', type: 'checklist', title: '팀원 연락처 등록',
+    desc: '팀 슬랙, 연락처를 저장하고 인사해보세요.',
+    checklist: [
+      { label: '팀원 연락처 저장', hint: '팀 디렉토리에서 전체 연락처를 내려받으세요' },
+      { label: '팀 채팅방에 인사 남기기', hint: '"안녕하세요, 새로 합류한 OOO입니다!" 한 줄이면 충분합니다' },
+    ],
+    body: `> 💡 연락처는 [팀 디렉토리 링크]에서 CSV로 다운로드할 수 있습니다.`
+  },
+  {
+    chapter: '세팅', type: 'checklist', title: '지문 등록 & 출입카드',
+    desc: '사무실 출입을 위한 생체 인증을 등록합니다.',
+    checklist: [
+      { label: '관리팀 방문하여 지문 등록', hint: '3층 관리팀 (09:00-18:00)' },
+      { label: '출입카드 수령', hint: '지문 등록 시 함께 수령' },
+    ],
+    body: `### 위치\n관리팀은 **3층 엘리베이터 앞**에 있습니다.`
+  },
+  {
+    chapter: '세팅', type: 'checklist', title: '계정 & 도구 초대',
+    desc: '업무에 필요한 모든 계정과 도구를 세팅합니다.',
+    checklist: [
+      { label: 'Google Workspace 계정 활성화', hint: 'IT팀에서 발송한 초대 메일 확인' },
+      { label: 'Discord 서버 참여', hint: '초대 링크는 Welcome 메일에 포함' },
+      { label: 'Notion 워크스페이스 참여', hint: '관리자 초대 후 접속 가능' },
+      { label: 'Figma 팀 참여', hint: '디자인팀에서 초대 발송' },
+      { label: 'Google Calendar 팀 캘린더 추가', hint: '캘린더 > 다른 캘린더 > URL로 추가' },
+    ],
+    body: `> 계정 관련 문제가 있으면 IT팀 채널 \`#it-support\` 에 문의하세요.`
+  },
+  {
+    chapter: '세팅', type: 'checklist', title: '공간 & 생활 가이드',
+    desc: '사무실 공간과 일상적인 것들을 익힙니다.',
+    checklist: [
+      { label: '사무실 투어 완료', hint: '버디에게 요청하세요' },
+      { label: '회의실 예약 방법 확인', hint: 'Google Calendar에서 "회의실" 리소스 선택' },
+      { label: '커피머신 사용법 확인', hint: '캡슐은 탕비실 서랍, 원두는 냉장고' },
+      { label: '퇴근 시 마감 절차 확인', hint: '창문 → 에어컨 → 조명 → 출입문 순서' },
+      { label: '프린터 연결 완료', hint: '네트워크 프린터 IP: 192.168.0.50' },
+      { label: '비밀번호 정책 확인', hint: '12자 이상, 90일마다 변경' },
+    ],
+    body: ``
+  },
+  {
+    chapter: '세팅', type: 'checklist', title: '근로계약서 확인',
+    desc: '근로계약서를 검토하고 서명합니다.',
+    checklist: [
+      { label: '근로계약서 수령', hint: '인사팀에서 전달' },
+      { label: '내용 검토 완료', hint: '급여, 근무시간, 수습기간 등 확인' },
+      { label: '서명 및 제출', hint: '원본 1부는 본인 보관' },
+    ],
+    body: `> 계약서 관련 질문은 인사팀 담당자에게 편하게 문의하세요.`
+  },
+
+  // CHAPTER 2: 서비스 체험
+  {
+    chapter: '서비스 체험', type: 'mission', title: '서비스 직접 사용해보기',
+    desc: '설명을 듣기 전에, 먼저 우리 서비스를 사용자 관점에서 체험합니다.',
+    missions: [
+      { title: '미션 1: 회원가입부터 시작', desc: '테스트 계정으로 서비스에 가입하고, 프로필을 완성해보세요.\n테스트 계정 정보는 버디에게 요청하세요.' },
+      { title: '미션 2: 핵심 플로우 체험', desc: '서비스의 메인 기능을 하나 이상 사용해보세요. 어떤 기능이든 좋습니다.' },
+      { title: '미션 3: 느낀 점 기록', desc: '사용하면서 좋았던 점, 불편했던 점, 궁금한 점을 자유롭게 적어주세요. 이 내용은 온보딩 미팅에서 함께 이야기합니다.' },
+    ]
+  },
+
+  // CHAPTER 3: 이해
+  {
+    chapter: '이해', type: 'learn', title: '로드맵',
+    desc: '우리 제품이 어디로 가고 있는지 큰 그림을 봅니다.',
+    body: `## 2024 로드맵 개요\n\n현재 우리는 **Phase 2 — 확장** 단계에 있습니다.\n\n### Phase 1: 기반 (완료)\n핵심 기능 출시, PMF 검증\n\n### Phase 2: 확장 (진행중)\n사용자 확대, 핵심 지표 개선, B2B 진출\n\n### Phase 3: 성장\n글로벌 진출, 플랫폼화\n\n> 상세 로드맵은 Notion의 "Product Roadmap" 페이지에서 확인하세요.`,
+    quiz: {
+      question: '현재 우리 제품은 어떤 단계에 있나요?',
+      options: ['Phase 1: 기반', 'Phase 2: 확장', 'Phase 3: 성장'],
+      answer: 1
+    }
+  },
+  {
+    chapter: '이해', type: 'learn', title: '서비스 기능 소개',
+    desc: '우리 서비스의 핵심 기능들을 이해합니다.',
+    body: `## 핵심 기능\n\n우리 서비스는 크게 3가지 축으로 구성됩니다.\n\n### 1. 대시보드\n사용자가 핵심 지표를 한눈에 볼 수 있는 화면입니다. 실시간 데이터를 기반으로 동작합니다.\n\n### 2. 워크플로우 빌더\n반복 업무를 자동화할 수 있는 기능입니다. 노코드 방식으로 누구나 쉽게 만들 수 있습니다.\n\n### 3. 리포팅\n주간/월간 리포트를 자동 생성하고 공유하는 기능입니다.\n\n> 각 기능의 상세 스펙은 Notion "Product Spec" 에서 확인하세요.`,
+    quiz: {
+      question: '워크플로우 빌더의 특징은?',
+      options: ['코딩이 필요하다', '노코드 방식이다', '외부 도구이다'],
+      answer: 1
+    }
+  },
+  {
+    chapter: '이해', type: 'learn', title: '도메인 용어 사전',
+    desc: '우리 팀에서 자주 사용하는 용어들을 정리했습니다.',
+    glossary: [
+      { term: 'MAU', def: 'Monthly Active Users. 월간 활성 사용자 수' },
+      { term: 'Retention', def: '재방문율. 특정 기간 후 다시 서비스를 사용하는 비율' },
+      { term: 'Funnel', def: '사용자가 특정 목표에 도달하기까지의 단계별 전환 흐름' },
+      { term: 'Sprint', def: '2주 단위의 개발 주기' },
+      { term: 'Hotfix', def: '긴급 버그 수정을 위한 즉시 배포' },
+      { term: 'PR', def: 'Pull Request. 코드 리뷰를 위한 병합 요청' },
+      { term: 'Staging', def: '배포 전 최종 테스트 환경' },
+      { term: 'On-call', def: '장애 대응 당번. 주 단위로 로테이션' },
+    ],
+    quiz: {
+      question: 'Sprint의 주기는?',
+      options: ['1주', '2주', '1개월'],
+      answer: 1
+    }
+  },
+  {
+    chapter: '이해', type: 'learn', title: '개발 프로세스',
+    desc: '우리 팀이 어떻게 개발하는지 알아봅니다.',
+    body: `## 개발 플로우\n\n### 1. 기획 → 디자인 → 개발 → QA → 배포\n\n매 Sprint(2주)마다 이 사이클을 반복합니다.\n\n### Sprint 회의\n- **월요일**: Sprint Planning — 이번 스프린트 할 일 결정\n- **매일 10:30**: Daily Standup — 15분 내 진행 공유\n- **금요일(격주)**: Sprint Review & Retro\n\n### 브랜치 전략\n\`main\` → \`develop\` → \`feature/기능명\`\n\n기능 개발은 \`feature/\` 브랜치에서 진행하고, PR을 통해 \`develop\`으로 병합합니다.\n코드 리뷰는 최소 1명의 승인이 필요합니다.\n\n### 배포\n- **Staging**: develop 브랜치 머지 시 자동 배포\n- **Production**: 매주 목요일 정기 배포 (긴급시 Hotfix)\n\n> 더 자세한 내용은 Notion "Engineering Wiki"를 참고하세요.`,
+    quiz: {
+      question: '코드 리뷰 시 최소 몇 명의 승인이 필요한가요?',
+      options: ['0명', '1명', '2명'],
+      answer: 1
+    }
+  },
+];
+
+// ─── STATE ───
+let currentStep = 0;
+const state = {
+  checks: {},    // { stepIdx-checkIdx: true }
+  quizzes: {},   // { stepIdx: selectedOption }
+  missions: {},  // { stepIdx: text }
+};
+
+// Try restore from localStorage
+try {
+  const saved = localStorage.getItem('onboarding_state');
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    Object.assign(state, parsed);
+  }
+} catch(e) {}
+
+function saveState() {
+  try { localStorage.setItem('onboarding_state', JSON.stringify(state)); } catch(e) {}
+}
+
+// ─── RENDER NAV ───
+function renderNav() {
+  const nav = document.getElementById('navSection');
+  let html = '';
+  let lastChapter = '';
+  steps.forEach((s, i) => {
+    if (s.chapter !== lastChapter) {
+      lastChapter = s.chapter;
+      html += `<div class="nav-chapter">${s.chapter}</div>`;
+    }
+    const done = isStepDone(i);
+    html += `<div class="nav-item ${i===currentStep?'active':''} ${done?'completed':''}" onclick="goTo(${i})">
+      <div class="nav-icon">${done?'✓':(i+1)}</div>
+      <span>${s.title}</span>
+    </div>`;
+  });
+  nav.innerHTML = html;
+  updateProgress();
+}
+
+function isStepDone(idx) {
+  const s = steps[idx];
+  if (s.type === 'checklist') {
+    return s.checklist.every((_, ci) => state.checks[`${idx}-${ci}`]);
+  }
+  if (s.type === 'learn' && s.quiz) {
+    return state.quizzes[idx] === s.quiz.answer;
+  }
+  if (s.type === 'mission') {
+    return !!state.missions[idx];
+  }
+  return false;
+}
+
+function updateProgress() {
+  const done = steps.filter((_, i) => isStepDone(i)).length;
+  const pct = Math.round((done / steps.length) * 100);
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+// ─── RENDER CONTENT ───
+function renderStep(idx) {
+  currentStep = idx;
+  const s = steps[idx];
+  const content = document.getElementById('content');
+  const badge = document.getElementById('chapterBadge');
+  const topTitle = document.getElementById('topbarTitle');
+
+  badge.className = 'chapter-badge ' + s.type;
+  badge.textContent = s.type === 'checklist' ? 'CHECKLIST' : s.type === 'mission' ? 'MISSION' : 'LEARN';
+  topTitle.textContent = s.title;
+
+  let html = `<div class="step-header">
+    <div class="step-number">Step ${idx+1} of ${steps.length}</div>
+    <div class="step-title">${s.title}</div>
+    <div class="step-desc">${s.desc}</div>
+  </div>`;
+
+  // Rendered body (simple MD simulation)
+  if (s.body) {
+    html += `<div class="md-body">${renderMD(s.body)}</div>`;
+  }
+
+  // Checklist
+  if (s.type === 'checklist' && s.checklist) {
+    s.checklist.forEach((c, ci) => {
+      const checked = state.checks[`${idx}-${ci}`];
+      html += `<div class="checklist-box ${checked?'checked':''}" onclick="toggleCheck(${idx},${ci})">
+        <div class="cb-check">${checked?'✓':''}</div>
+        <div class="cb-content">
+          <div class="cb-label">${c.label}</div>
+          <div class="cb-hint">${c.hint}</div>
+        </div>
+      </div>`;
+    });
+  }
+
+  // Mission
+  if (s.type === 'mission' && s.missions) {
+    s.missions.forEach((m, mi) => {
+      html += `<div class="mission-card">
+        <h4>${m.title}</h4>
+        <p>${m.desc.replace(/\n/g,'<br>')}</p>
+      </div>`;
+    });
+    html += `<textarea class="mission-textarea" placeholder="체험 후 느낀 점, 궁금한 점을 자유롭게 적어주세요..."
+      oninput="saveMission(${idx}, this.value)">${state.missions[idx]||''}</textarea>`;
+  }
+
+  // Glossary
+  if (s.glossary) {
+    s.glossary.forEach(g => {
+      html += `<div class="glossary-item">
+        <div class="glossary-term">${g.term}</div>
+        <div class="glossary-def">${g.def}</div>
+      </div>`;
+    });
+  }
+
+  // Quiz
+  if (s.quiz) {
+    const q = s.quiz;
+    const answered = state.quizzes[idx] !== undefined;
+    const selected = state.quizzes[idx];
+    html += `<div class="quiz-wrap">
+      <div class="quiz-q">💬 ${q.question}</div>`;
+    q.options.forEach((o, oi) => {
+      let cls = '';
+      if (answered && oi === selected) cls = oi === q.answer ? 'correct' : 'wrong';
+      else if (answered && oi === q.answer) cls = 'correct';
+      html += `<div class="quiz-option ${cls}" onclick="answerQuiz(${idx},${oi})">
+        <div class="quiz-radio"></div><span>${o}</span>
+      </div>`;
+    });
+    if (answered) {
+      const isCorrect = selected === q.answer;
+      html += `<div class="quiz-feedback show ${isCorrect?'correct':'wrong'}">
+        ${isCorrect ? '✅ 정답!' : '❌ 다시 확인해보세요. 정답을 표시해뒀습니다.'}
+      </div>`;
+    }
+    html += `</div>`;
+  }
+
+  content.innerHTML = html;
+  content.style.animation = 'none';
+  content.offsetHeight;
+  content.style.animation = 'fadeUp 0.4s ease';
+  renderNav();
+}
+
+// Simple MD → HTML
+function renderMD(md) {
+  return md
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/^(?!<)(.+)/gm, '<p>$1</p>')
+    .replace(/<p><\/p>/g, '');
+}
+
+// ─── INTERACTIONS ───
+function toggleCheck(stepIdx, checkIdx) {
+  const key = `${stepIdx}-${checkIdx}`;
+  state.checks[key] = !state.checks[key];
+  saveState();
+  renderStep(stepIdx);
+  if (isStepDone(stepIdx)) showToast('✅ 모두 완료!');
+}
+
+function answerQuiz(stepIdx, optIdx) {
+  if (state.quizzes[stepIdx] !== undefined) return;
+  state.quizzes[stepIdx] = optIdx;
+  saveState();
+  renderStep(stepIdx);
+}
+
+function saveMission(stepIdx, val) {
+  state.missions[stepIdx] = val;
+  saveState();
+  updateProgress();
+}
+
+function navigate(dir) {
+  const next = currentStep + dir;
+  if (next >= 0 && next < steps.length) renderStep(next);
+}
+
+function goTo(idx) { renderStep(idx); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// Init
+renderStep(0);
+</script>
+</body>
+</html>
