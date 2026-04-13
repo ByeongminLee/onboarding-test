@@ -2,6 +2,9 @@ import { resolve } from 'path'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import mdx from '@mdx-js/rollup'
+import remarkFrontmatter from 'remark-frontmatter'
+import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 
 export default defineConfig({
   main: {
@@ -17,6 +20,19 @@ export default defineConfig({
         '@': resolve('src/renderer')
       }
     },
-    plugins: [tailwindcss(), react()]
+    plugins: [
+      tailwindcss(),
+      {
+        enforce: 'pre',
+        ...mdx({
+          remarkPlugins: [
+            remarkFrontmatter,
+            [remarkMdxFrontmatter, { name: 'frontmatter' }],
+          ],
+          providerImportSource: '@mdx-js/react',
+        }),
+      },
+      react(),
+    ]
   }
 })
