@@ -17,10 +17,12 @@ export default function App() {
   }, []);
 
   return (
-    <div className="flex h-screen">
+    <>
       <StorageWarning />
-      <Sidebar tree={contentTree} />
-      <MainArea />
-    </div>
+      <div className="flex h-screen">
+        <Sidebar tree={contentTree} />
+        <MainArea />
+      </div>
+    </>
   );
 }
