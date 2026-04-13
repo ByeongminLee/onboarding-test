@@ -1,0 +1,81 @@
+---
+title: 프론트엔드 개발환경 세팅
+description: Node.js, pnpm 설치 후 프론트엔드 로컬 개발 서버를 실행합니다
+type: mission
+enforce: false
+---
+
+<Head title="프론트엔드 개발환경 세팅" date="2026-04-14" description="Node.js + pnpm + Turborepo 모노레포 환경 구성" />
+
+## 사전 준비: Node.js + pnpm 설치
+
+레포는 **Node.js 24.0.2** + **pnpm 10.13.1** 버전을 고정합니다.
+
+### 1. Node.js 설치
+
+[Node.js 공식 사이트](https://nodejs.org)에서 24.x LTS 버전을 설치하거나, `nvm`을 사용합니다.
+
+```bash
+# nvm 사용 시
+nvm install 24.0.2
+nvm use 24.0.2
+
+# 버전 확인
+node -v  # v24.0.2
+```
+
+### 2. pnpm 설치
+
+```bash
+npm install -g pnpm@10.13.1
+
+# 버전 확인
+pnpm -v  # 10.13.1
+```
+
+---
+
+## 레포 클론 및 실행
+
+```bash
+git clone git@github.com:team-foodlogic/foodlogic-frontend.git
+cd foodlogic-frontend
+```
+
+### 한 번에 실행 (권장)
+
+```bash
+pnpm bootstrap:dev
+```
+
+내부적으로 `pnpm install --frozen-lockfile` 후 `pnpm dev`를 실행합니다.
+
+### 접속 주소
+
+| 앱 | URL | 설명 |
+|---|---|---|
+| Client | http://localhost:3000 | 메인 유저 앱 |
+| Admin | http://localhost:3100 | 관리자 대시보드 |
+| Wiki | http://localhost:3200 | 내부 문서 사이트 |
+
+---
+
+## 모노레포 구조 요약
+
+```
+foodlogic-frontend/
+├── apps/
+│   ├── client/    # 유저 앱 (포트 3000)
+│   ├── admin/     # 어드민 (포트 3100)
+│   └── wiki/      # 위키 (포트 3200)
+└── packages/
+    ├── api/       # React Query 훅 + API 함수
+    ├── ui/        # 공통 UI 컴포넌트 (Shadcn/Radix)
+    ├── types/     # 공유 TypeScript 타입
+    └── ...        # 기타 유틸리티 패키지
+```
+
+Turborepo로 관리되며, `pnpm dev`는 세 앱을 병렬로 실행합니다.
+
+<Mission title="프론트엔드 환경 세팅 완료" description="pnpm bootstrap:dev 실행 후 localhost:3000이 정상적으로 열리면 완료" />
+<MissionNote />
