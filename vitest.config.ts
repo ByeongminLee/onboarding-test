@@ -10,6 +10,9 @@ export default defineConfig({
     globals: true,
   },
   resolve: {
-    alias: { '@': path.resolve(__dirname, 'src/renderer') },
+    alias: {
+      '@': path.resolve(__dirname, 'src/renderer'),
+      '@renderer': path.resolve(__dirname, 'src/renderer'),
+    },
   },
 });
