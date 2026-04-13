@@ -48,7 +48,11 @@ export function MatrixTable({ columns, rows }: MatrixTableProps) {
         </button>
       </div>
 
-      <div className="mdx-matrix-wrap" role="region" aria-label="레이어 도메인 매트릭스">
+      <div
+        className="mdx-matrix-wrap"
+        role="region"
+        aria-label="레이어 도메인 매트릭스"
+      >
         {table}
       </div>
 
