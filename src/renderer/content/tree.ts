@@ -70,7 +70,9 @@ export function buildContentTree(
   for (const [partId, items] of docsByPart.entries()) {
     const meta = partMeta.get(partId);
     if (!meta) throw new Error(`missing _meta.json for ${partId}`);
-    const partOrder = Number(partId.match(/^part-(\d+)-/)![1]);
+    const partOrderMatch = partId.match(/^part-(\d+)-/);
+    if (!partOrderMatch) throw new Error(`Unexpected partId format: ${partId}`);
+    const partOrder = Number(partOrderMatch[1]);
     items.sort((a, b) => a.order - b.order);
     parts.push({
       id: partId,
