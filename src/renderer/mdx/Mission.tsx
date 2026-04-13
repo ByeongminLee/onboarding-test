@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { DocContext } from './provider';
+import { DocContext } from './doc-context';
 import { useOnboardingStore } from '@/store/onboarding-store';
 
 interface MissionProps {
