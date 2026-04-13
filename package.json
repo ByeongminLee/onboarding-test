@@ -6,10 +6,33 @@
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
+    "package": "electron-vite build && electron-builder --dir",
+    "package:full": "electron-vite build && electron-builder",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test"
+  },
+  "build": {
+    "appId": "com.foodlogic.onboarding",
+    "productName": "Developer Onboarding",
+    "directories": { "output": "dist" },
+    "files": [
+      "out/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.developer-tools",
+      "identity": null
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Development"
+    }
   },
   "devDependencies": {
     "@electron-toolkit/preload": "^3.0.1",
